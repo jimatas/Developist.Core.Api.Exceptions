@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Developist.Extensions.Api.ProblemDetails
 {
-    public static class ApiExceptionExtensions
+    public static class ApiProblemDetailsExtensions
     {
         public static ApiProblemDetails ToProblemDetails(this ApiException exception, bool discloseExceptionDetails = false)
         {
