@@ -30,7 +30,7 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
                 return reader.GetDouble();
             }
 
-            if (tokenType == JsonTokenType.True || tokenType == JsonTokenType.False)
+            if (tokenType is JsonTokenType.True or JsonTokenType.False)
             {
                 return reader.GetBoolean();
             }
