@@ -55,5 +55,110 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.IsFalse(options.Converters.Any());
         }
+
+        [TestMethod]
+        public void Serialize_GivenBooleanTrue_WritesTrue()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "BooleanProperty", true }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"BooleanProperty\":true}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenBooleanFalse_WritesFalse()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "BooleanProperty", false }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"BooleanProperty\":false}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenInt32Value_WritesIt()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "Int32Property", 12 }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"Int32Property\":12}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenInt64Value_WritesIt()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "Int64Property", (long)int.MaxValue + 1 }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"Int64Property\":2147483648}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenDoubleValue_WritesIt()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "DoubleProperty", 123.456 }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"DoubleProperty\":123.456}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenStringValue_WritesIt()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "StringProperty", "Hello, World!" }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"StringProperty\":\"Hello, World!\"}", jsonString);
+        }
+
+        [TestMethod]
+        public void Serialize_GivenObjectValue_WritesIt()
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            IDictionary<string, object?> obj = new Dictionary<string, object?>
+            {
+                { "ObjectProperty", new object() }
+            };
+
+            var jsonString = JsonSerializer.Serialize(obj, options);
+
+            Assert.AreEqual("{\"ObjectProperty\":{}}", jsonString);
+        }
     }
 }
