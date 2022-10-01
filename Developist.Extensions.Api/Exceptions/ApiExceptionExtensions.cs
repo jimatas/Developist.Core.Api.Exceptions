@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 
 namespace Developist.Extensions.Api.Exceptions
 {
@@ -96,6 +97,30 @@ namespace Developist.Extensions.Api.Exceptions
                 HttpStatusCode.NetworkAuthenticationRequired => new Uri("https://www.rfc-editor.org/rfc/rfc6585.html#section-6"),
                 _ => new Uri("about:blank")
             };
+        }
+
+        public static string DetailMessage(this ApiException exception)
+        {
+            StringBuilder detailMessageBuilder = new(DetailMessageFor(exception));
+
+            Exception? innerException = exception.InnerException;
+            for (int level = 1; innerException is not null; level++)
+            {
+                detailMessageBuilder.Append($" [InnerException ({level}): {DetailMessageFor(innerException)}]");
+                innerException = innerException.InnerException;
+            }
+
+            return detailMessageBuilder.ToString();
+
+            static string DetailMessageFor(Exception exception)
+            {
+                string detailMessage = $"{exception.GetType().FullName}: {exception.Message}";
+                if (!string.IsNullOrEmpty(exception.StackTrace))
+                {
+                    detailMessage += Environment.NewLine + exception.StackTrace;
+                }
+                return detailMessage;
+            }
         }
     }
 }

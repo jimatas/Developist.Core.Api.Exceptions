@@ -1,8 +1,10 @@
 ﻿using Developist.Extensions.Api.Exceptions;
 
+using System.Text;
+
 namespace Developist.Extensions.Api.ProblemDetails
 {
-    public static class ApiProblemDetailsExtensions
+    public static class ApiExceptionExtensions
     {
         public static ApiProblemDetails ToProblemDetails(this ApiException exception, bool discloseExceptionDetails = false)
         {
