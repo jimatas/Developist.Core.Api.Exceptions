@@ -16,7 +16,7 @@
     <FileVersion>$(Major).$(Minor).$(Build).$(Revision)</FileVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <Description>Some useful extensions, such as those for error handling and problem reporting, for use in ASP.NET Core Web API projects.</Description>
+    <Description>Some useful extensions for use in ASP.NET Core Web API projects, such as those for error handling and problem reporting.</Description>
     <PackageTags>api;webapi;problemdetails;exceptions;exceptionfilter</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
