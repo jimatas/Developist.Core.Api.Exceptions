@@ -1,6 +1,10 @@
 ﻿using Developist.Extensions.Api.Exceptions;
+using Developist.Extensions.Api.ProblemDetails;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
+
+using System.Diagnostics;
 
 namespace Developist.Extensions.Api.MvcFilters
 {
@@ -8,5 +12,9 @@ namespace Developist.Extensions.Api.MvcFilters
     {
         public Func<ApiException, IHostEnvironment?, bool> ShouldHandleException { get; set; } = (_, _) => true;
         public Func<ApiException, IHostEnvironment?, bool> ShouldDiscloseExceptionDetails { get; set; } = (_, env) => env?.IsDevelopment() == true;
+        public Action<ApiProblemDetails, HttpContext> OnSerializingProblemDetails { get; set; } = (prob, ctx) =>
+        {
+            prob.Extensions["traceId"] = Activity.Current?.Id ?? ctx.TraceIdentifier;
+        };
     }
 }

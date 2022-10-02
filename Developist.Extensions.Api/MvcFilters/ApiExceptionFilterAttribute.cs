@@ -8,8 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-using System.Diagnostics;
-
 namespace Developist.Extensions.Api.MvcFilters
 {
     public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
@@ -29,7 +27,7 @@ namespace Developist.Extensions.Api.MvcFilters
             if (exceptionContext.Exception is ApiException exception && ShouldHandleException(exception, exceptionContext.HttpContext))
             {
                 var problemDetails = exception.ToProblemDetails(ShouldDiscloseExceptionDetails(exception, exceptionContext.HttpContext));
-                AddTraceId(problemDetails, exceptionContext.HttpContext);
+                OnSerializingProblemDetails(problemDetails, exceptionContext.HttpContext);
 
                 exceptionContext.Result = new ObjectResult(problemDetails);
                 exceptionContext.ExceptionHandled = true;
@@ -53,9 +51,10 @@ namespace Developist.Extensions.Api.MvcFilters
             return options?.ShouldDiscloseExceptionDetails(exception, environment) == true;
         }
 
-        private static void AddTraceId(ApiProblemDetails problemDetails, HttpContext httpContext)
+        private void OnSerializingProblemDetails(ApiProblemDetails problemDetails, HttpContext httpContext)
         {
-            problemDetails.Extensions["traceId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+            ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
+            options?.OnSerializingProblemDetails(problemDetails, httpContext);
         }
     }
 }
