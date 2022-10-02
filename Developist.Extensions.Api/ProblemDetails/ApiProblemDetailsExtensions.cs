@@ -1,7 +1,5 @@
 ﻿using Developist.Extensions.Api.Exceptions;
 
-using System.Text;
-
 namespace Developist.Extensions.Api.ProblemDetails
 {
     public static class ApiProblemDetailsExtensions
