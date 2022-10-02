@@ -17,6 +17,7 @@ namespace Developist.Extensions.Api.MvcFilters
         private readonly ApiExceptionFilterOptions? options;
         private readonly IHostEnvironment? environment;
 
+        public ApiExceptionFilterAttribute() { }
         public ApiExceptionFilterAttribute(IOptions<ApiExceptionFilterOptions>? options = null, IHostEnvironment? environment = null)
         {
             this.options = options?.Value;
