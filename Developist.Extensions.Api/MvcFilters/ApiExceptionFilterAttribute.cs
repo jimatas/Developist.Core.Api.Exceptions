@@ -40,7 +40,7 @@ namespace Developist.Extensions.Api.MvcFilters
             IHostEnvironment? environment = this.environment ?? httpContext.RequestServices.GetService<IHostEnvironment>();
             ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
 
-            return options?.ShouldHandleException(exception, environment) == true;
+            return options?.ShouldHandleException(exception, environment) is true;
         }
 
         private bool ShouldDiscloseExceptionDetails(ApiException exception, HttpContext httpContext)
@@ -48,7 +48,7 @@ namespace Developist.Extensions.Api.MvcFilters
             IHostEnvironment? environment = this.environment ?? httpContext.RequestServices.GetService<IHostEnvironment>();
             ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
 
-            return options?.ShouldDiscloseExceptionDetails(exception, environment) == true;
+            return options?.ShouldDiscloseExceptionDetails(exception, environment) is true;
         }
 
         private void OnSerializingProblemDetails(ApiProblemDetails problemDetails, HttpContext httpContext)
