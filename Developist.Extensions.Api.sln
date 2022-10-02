@@ -5,7 +5,12 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Developist.Extensions.Api", "Developist.Extensions.Api\Developist.Extensions.Api.csproj", "{576E2183-2646-4CDB-BEB8-39FDF352D454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Developist.Extensions.Api.Tests", "Developist.Extensions.Api.Tests\Developist.Extensions.Api.Tests.csproj", "{5096D054-931C-4312-BEB1-CF7E4A820A68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Developist.Extensions.Api.Tests", "Developist.Extensions.Api.Tests\Developist.Extensions.Api.Tests.csproj", "{5096D054-931C-4312-BEB1-CF7E4A820A68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{915BD000-1DB4-433B-843F-ED6CD410414D}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
