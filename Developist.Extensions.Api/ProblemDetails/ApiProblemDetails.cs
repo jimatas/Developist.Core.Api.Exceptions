@@ -3,18 +3,29 @@
 using System.Net;
 using System.Text.Json.Serialization;
 
+using MvcProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
+
 namespace Developist.Extensions.Api.ProblemDetails
 {
     [JsonConverter(typeof(ApiProblemDetailsJsonConverter))]
-    public class ApiProblemDetails
+    public class ApiProblemDetails : MvcProblemDetails
     {
-        public Uri? Type { get; internal set; }
-        public string? Title { get; internal set; }
-        public HttpStatusCode? Status { get; internal set; }
-        public string? Detail { get; internal set; }
-        public Uri? Instance { get; internal set; }
+        public new Uri? Type
+        {
+            get => base.Type is null ? null : new Uri(base.Type);
+            set => base.Type = value?.ToString();
+        }
 
-        [JsonExtensionData]
-        public IDictionary<string, object?> Extensions { get; } = new Dictionary<string, object?>();
+        public new HttpStatusCode? Status
+        {
+            get => base.Status is null ? null : (HttpStatusCode)base.Status;
+            set => base.Status = value is null ? null : (int)value;
+        }
+
+        public new Uri? Instance
+        {
+            get => base.Instance is null ? null : new Uri(base.Instance);
+            set => base.Instance = value?.ToString();
+        }
     }
 }
