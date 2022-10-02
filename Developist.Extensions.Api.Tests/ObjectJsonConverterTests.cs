@@ -160,5 +160,57 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.AreEqual("{\"ObjectProperty\":{}}", jsonString);
         }
+
+        [DataTestMethod]
+        [DataRow("true", true)]
+        [DataRow("false", false)]
+        public void Deserialize_GivenJsonBoolean_ReadsIt(string jsonString, bool expectedValue)
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, typeof(bool));
+            Assert.AreEqual(expectedValue, obj);
+        }
+
+        [DataTestMethod]
+        [DataRow("32", 32)]
+        [DataRow("2147483647", int.MaxValue)]
+        public void Deserialize_GivenJsonInt32_ReadsIt(string jsonString, int expectedValue)
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
+
+        [DataTestMethod]
+        [DataRow("2147483648", (long)int.MaxValue + 1)]
+        [DataRow("-9223372036854775808", long.MinValue)]
+        public void Deserialize_GivenJsonInt64_ReadsIt(string jsonString, long expectedValue)
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
+
+        [DataTestMethod]
+        [DataRow("0.0", 0.0f)]
+        [DataRow("-123.456", -123.456)]
+        public void Deserialize_GivenJsonDouble_ReadsIt(string jsonString, double expectedValue)
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
     }
 }
