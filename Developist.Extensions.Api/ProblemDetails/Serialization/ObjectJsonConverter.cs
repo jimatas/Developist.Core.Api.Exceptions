@@ -37,6 +37,16 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
 
             if (tokenType == JsonTokenType.String)
             {
+                if (reader.TryGetDateTimeOffset(out var dateTimeOffsetValue))
+                {
+                    return dateTimeOffsetValue;
+                }
+
+                if (reader.TryGetGuid(out var guidValue))
+                {
+                    return guidValue;
+                }
+
                 return reader.GetString();
             }
 

@@ -212,5 +212,49 @@ namespace Developist.Extensions.Api.Tests
             Assert.IsInstanceOfType(obj, expectedValue.GetType());
             Assert.AreEqual(expectedValue, obj);
         }
+
+        [DataTestMethod]
+        [DataRow("\"2022-10-02T10:57:06.0937503+02:00\"", "2022-10-02T10:57:06.0937503+02:00")]
+        [DataRow("\"2022-10-02T08:57:06Z\"", "2022-10-02T08:57:06Z")]
+        public void Deserialize_GivenJsonDateTimeOffset_ReadsIt(string jsonString, string expectedValueBeforeParsing)
+        {
+            DateTimeOffset expectedValue = DateTimeOffset.Parse(expectedValueBeforeParsing);
+
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
+
+        [DataTestMethod]
+        [DataRow("\"53fc6500-e338-42a2-8b20-34f885209490\"", "53fc6500-e338-42a2-8b20-34f885209490")]
+        [DataRow("\"00000000-0000-0000-0000-000000000000\"", "00000000-0000-0000-0000-000000000000")]
+        public void Deserialize_GivenJsonGuid_ReadsIt(string jsonString, string expectedValueBeforeParsing)
+        {
+            Guid expectedValue = Guid.Parse(expectedValueBeforeParsing);
+
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
+
+        [DataTestMethod]
+        [DataRow("\"Hello, world!\"", "Hello, world!")]
+        [DataRow("\"2022-01-1A\"", "2022-01-1A")]
+        [DataRow("\"\"", "")]
+        public void Deserialize_GivenJsonString_ReadsIt(string jsonString, string expectedValue)
+        {
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options);
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue, obj);
+        }
     }
 }
