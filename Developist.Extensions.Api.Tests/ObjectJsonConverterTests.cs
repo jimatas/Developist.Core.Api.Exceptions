@@ -1,5 +1,6 @@
 using Developist.Extensions.Api.ProblemDetails.Serialization;
 
+using System.Dynamic;
 using System.Text.Json;
 
 namespace Developist.Extensions.Api.Tests
@@ -138,12 +139,12 @@ namespace Developist.Extensions.Api.Tests
 
             IDictionary<string, object?> obj = new Dictionary<string, object?>
             {
-                { "StringProperty", "Hello, World!" }
+                { "StringProperty", "Hello, world!" }
             };
 
             var jsonString = JsonSerializer.Serialize(obj, options);
 
-            Assert.AreEqual("{\"StringProperty\":\"Hello, World!\"}", jsonString);
+            Assert.AreEqual("{\"StringProperty\":\"Hello, world!\"}", jsonString);
         }
 
         [TestMethod]
@@ -255,6 +256,42 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.IsInstanceOfType(obj, expectedValue.GetType());
             Assert.AreEqual(expectedValue, obj);
+        }
+
+        [TestMethod]
+        public void Deserialize_GivenJsonArray_ReadsIt()
+        {
+            string jsonString = "[\"Hello, world!\", 32, -123.456, \"2022-01-01T23:59:59Z\"]";
+            object[] expectedValue = new object[] { "Hello, world!", 32, -123.456, new DateTimeOffset(2022, 1, 1, 23, 59, 59, TimeSpan.Zero) };
+
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options)!;
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.IsTrue(expectedValue.SequenceEqual((IEnumerable<object>)obj));
+        }
+
+        [TestMethod]
+        public void Deserialize_GivenJsonObject_ReadsIt()
+        {
+            string jsonString = "{\"StringProperty\": \"Hello, world!\", \"Int32Property\": 32, \"DoubleProperty\": -123.456, \"DateTimeOffsetProperty\": \"2022-01-01T23:59:59Z\"}";
+
+            dynamic expectedValue = new ExpandoObject();
+            expectedValue.StringProperty = "Hello, world!";
+            expectedValue.Int32Property = 32;
+            expectedValue.DoubleProperty = -123.456;
+            expectedValue.DateTimeOffsetProperty = new DateTimeOffset(2022, 1, 1, 23, 59, 59, TimeSpan.Zero);
+
+            var options = new JsonSerializerOptions().WithObjectConverter();
+
+            var obj = JsonSerializer.Deserialize<object>(jsonString, options)!;
+
+            Assert.IsInstanceOfType(obj, expectedValue.GetType());
+            Assert.AreEqual(expectedValue.StringProperty, ((dynamic)obj).StringProperty);
+            Assert.AreEqual(expectedValue.Int32Property, ((dynamic)obj).Int32Property);
+            Assert.AreEqual(expectedValue.DoubleProperty, ((dynamic)obj).DoubleProperty);
+            Assert.AreEqual(expectedValue.DateTimeOffsetProperty, ((dynamic)obj).DateTimeOffsetProperty);
         }
     }
 }
