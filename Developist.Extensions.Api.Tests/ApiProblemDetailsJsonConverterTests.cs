@@ -1,5 +1,6 @@
 ﻿using Developist.Extensions.Api.ProblemDetails;
 
+using System.Dynamic;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -55,7 +56,7 @@ namespace Developist.Extensions.Api.Tests
         }
 
         [TestMethod]
-        public void Deserialize_GivenJsonObjectWithProperties_ReadsThemIntoProblemDetails()
+        public void Deserialize_GivenJsonObjectWithMultipleProperties_ReadsThemAllIntoProblemDetails()
         {
             string jsonString = "{\"type\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\",\"title\":\"Internal Server Error\",\"status\":500,\"detail\":\"There was a problem servicing your request.\",\"instance\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\"}";
 
@@ -69,7 +70,7 @@ namespace Developist.Extensions.Api.Tests
         }
 
         [TestMethod]
-        public void Serialize_GivenProblemDetailsWithSingleSimpleExtensionProperty_WritesThatProperty()
+        public void Serialize_GivenProblemDetailsWithSimpleExtensionProperty_WritesThatProperty()
         {
             ApiProblemDetails problemDetails = new();
             problemDetails.Extensions["customErrorData"] = "Additional information about the error.";
@@ -78,6 +79,18 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.IsNotNull(jsonString);
             Assert.AreEqual("{\"customErrorData\":\"Additional information about the error.\"}", jsonString);
+        }
+
+        [TestMethod]
+        public void Deserialize_GivenJsonObjectWithSimpleExtensionProperty_ReadsThatProperty()
+        {
+            string jsonString = "{\"customErrorData\":\"Additional information about the error.\"}";
+
+            var problemDetails = JsonSerializer.Deserialize<ApiProblemDetails>(jsonString)!;
+
+            Assert.IsTrue(problemDetails.Extensions.Any());
+            Assert.IsTrue(problemDetails.Extensions.ContainsKey("customErrorData"));
+            Assert.AreEqual("Additional information about the error.", problemDetails.Extensions["customErrorData"]);
         }
 
         [TestMethod]
@@ -94,6 +107,23 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.IsNotNull(jsonString);
             Assert.AreEqual("{\"customErrorData\":{\"ErrorNumber\":100,\"ErrorInformation\":\"Additional information about the error.\"}}", jsonString);
+        }
+
+        [TestMethod]
+        public void Deserialize_GivenJsonObjectWithComplexExtensionProperty_ReadsThatProperty()
+        {
+            string jsonString = "{\"customErrorData\":{\"ErrorNumber\":100,\"ErrorInformation\":\"Additional information about the error.\"}}";
+
+            var problemDetails = JsonSerializer.Deserialize<ApiProblemDetails>(jsonString)!;
+
+            Assert.IsTrue(problemDetails.Extensions.Any());
+            Assert.IsTrue(problemDetails.Extensions.ContainsKey("customErrorData"));
+
+            Assert.IsInstanceOfType(problemDetails.Extensions["customErrorData"], typeof(ExpandoObject));
+
+            var customErrorData = (dynamic)problemDetails.Extensions["customErrorData"];
+            Assert.AreEqual(100, customErrorData.ErrorNumber);
+            Assert.AreEqual("Additional information about the error.", customErrorData.ErrorInformation);
         }
 
         class CustomErrorData1
