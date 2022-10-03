@@ -9,84 +9,47 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
     {
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var tokenType = reader.TokenType;
-            if (tokenType == JsonTokenType.Null)
+            return reader.TokenType switch
             {
-                return null;
-            }
-
-            if (tokenType == JsonTokenType.Number)
-            {
-                if (reader.TryGetInt32(out var int32Value))
-                {
-                    return int32Value;
-                }
-
-                if (reader.TryGetInt64(out var int64Value))
-                {
-                    return int64Value;
-                }
-
-                return reader.GetDouble();
-            }
-
-            if (tokenType is JsonTokenType.True or JsonTokenType.False)
-            {
-                return reader.GetBoolean();
-            }
-
-            if (tokenType == JsonTokenType.String)
-            {
-                if (reader.TryGetDateTimeOffset(out var dateTimeOffsetValue))
-                {
-                    return dateTimeOffsetValue;
-                }
-
-                if (reader.TryGetGuid(out var guidValue))
-                {
-                    return guidValue;
-                }
-
-                return reader.GetString();
-            }
-
-            if (tokenType == JsonTokenType.StartObject)
-            {
-                return ReadObject(ref reader, options);
-            }
-
-            if (tokenType == JsonTokenType.StartArray)
-            {
-                return ReadArray(ref reader, options);
-            }
-
-            throw new JsonException($"Unsupported JSON token '{tokenType}'.");
+                JsonTokenType.Null => null,
+                JsonTokenType.True => true,
+                JsonTokenType.False => false,
+                JsonTokenType.Number when reader.TryGetInt32(out int value) => value,
+                JsonTokenType.Number when reader.TryGetInt64(out long value) => value,
+                JsonTokenType.Number => reader.GetDouble(),
+                JsonTokenType.String when reader.TryGetDateTimeOffset(out DateTimeOffset value) => value,
+                JsonTokenType.String when reader.TryGetGuid(out Guid value) => value,
+                JsonTokenType.String => reader.GetString(),
+                JsonTokenType.StartObject => ReadObject(ref reader, options),
+                JsonTokenType.StartArray => ReadArray(ref reader, options),
+                _ => throw new JsonException($"Unsupported JSON token '{reader.TokenType}'.")
+            };
         }
 
         private object ReadObject(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            var obj = new ExpandoObject() as IDictionary<string, object?>;
+            var value = new ExpandoObject() as IDictionary<string, object?>;
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
                 var key = reader.GetString()!;
                 reader.Read();
-                obj.Add(key, Read(ref reader, typeof(object), options));
+                value.Add(key, Read(ref reader, typeof(object), options));
             }
 
-            return obj;
+            return value;
         }
 
         private object?[] ReadArray(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            ArrayList array = new();
+            ArrayList value = new();
 
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
-                array.Add(Read(ref reader, typeof(object), options));
+                value.Add(Read(ref reader, typeof(object), options));
             }
 
-            return array.ToArray();
+            return value.ToArray();
         }
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
