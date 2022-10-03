@@ -21,6 +21,22 @@ namespace Developist.Extensions.Api.Tests
         }
 
         [TestMethod]
+        public void Deserialize_GivenEmptyObject_ReadsDefaultProblemDetailsInstance()
+        {
+            string jsonString = "{}";
+
+            var problemDetails = JsonSerializer.Deserialize<ApiProblemDetails>(jsonString);
+
+            Assert.IsNotNull(problemDetails);
+            Assert.IsNull(problemDetails.Type);
+            Assert.IsNull(problemDetails.Title);
+            Assert.IsNull(problemDetails.Status);
+            Assert.IsNull(problemDetails.Detail);
+            Assert.IsNull(problemDetails.Instance);
+            Assert.IsFalse(problemDetails.Extensions.Any());
+        }
+
+        [TestMethod]
         public void Serialize_GivenProblemDetailsWithAllPropertiesSet_WritesAllProperties()
         {
             var problemDetails = new ApiProblemDetails
@@ -36,6 +52,20 @@ namespace Developist.Extensions.Api.Tests
 
             Assert.IsNotNull(jsonString);
             Assert.AreEqual("{\"type\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\",\"title\":\"Internal Server Error\",\"status\":500,\"detail\":\"There was a problem servicing your request.\",\"instance\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\"}", jsonString);
+        }
+
+        [TestMethod]
+        public void Deserialize_GivenJsonObjectWithProperties_ReadsThemIntoProblemDetails()
+        {
+            string jsonString = "{\"type\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\",\"title\":\"Internal Server Error\",\"status\":500,\"detail\":\"There was a problem servicing your request.\",\"instance\":\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\"}";
+
+            var problemDetails = JsonSerializer.Deserialize<ApiProblemDetails>(jsonString)!;
+
+            Assert.AreEqual(new Uri("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"), problemDetails.Type);
+            Assert.AreEqual("Internal Server Error", problemDetails.Title);
+            Assert.AreEqual(HttpStatusCode.InternalServerError, problemDetails.Status);
+            Assert.AreEqual("There was a problem servicing your request.", problemDetails.Detail);
+            Assert.AreEqual(new Uri("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"), problemDetails.Instance);
         }
 
         [TestMethod]
