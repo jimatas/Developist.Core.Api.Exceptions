@@ -8,44 +8,44 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
     {
         public override ApiProblemDetails? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            ApiProblemDetails value = new();
+            ApiProblemDetails result = new();
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
                 if (reader.ValueTextEquals("type"))
                 {
                     reader.Read();
-                    value.Type = new Uri(reader.GetString()!);
+                    result.Type = new Uri(reader.GetString()!);
                 }
                 else if (reader.ValueTextEquals("title"))
                 {
                     reader.Read();
-                    value.Title = reader.GetString();
+                    result.Title = reader.GetString();
                 }
                 else if (reader.ValueTextEquals("status"))
                 {
                     reader.Read();
-                    value.Status = (HttpStatusCode)reader.GetInt32();
+                    result.Status = (HttpStatusCode)reader.GetInt32();
                 }
                 else if (reader.ValueTextEquals("detail"))
                 {
                     reader.Read();
-                    value.Detail = reader.GetString();
+                    result.Detail = reader.GetString();
                 }
                 else if (reader.ValueTextEquals("instance"))
                 {
                     reader.Read();
-                    value.Instance = new Uri(reader.GetString()!);
+                    result.Instance = new Uri(reader.GetString()!);
                 }
                 else
                 {
                     var key = reader.GetString()!;
                     reader.Read();
-                    value.Extensions[key] = JsonSerializer.Deserialize(ref reader, typeof(object), options.WithObjectConverter());
+                    result.Extensions[key] = JsonSerializer.Deserialize(ref reader, typeof(object), options.WithObjectConverter());
                 }
             }
 
-            return value;
+            return result;
         }
 
         public override void Write(Utf8JsonWriter writer, ApiProblemDetails value, JsonSerializerOptions options)

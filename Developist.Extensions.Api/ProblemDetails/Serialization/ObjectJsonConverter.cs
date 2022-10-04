@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,11 +13,11 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
                 JsonTokenType.Null => null,
                 JsonTokenType.True => true,
                 JsonTokenType.False => false,
-                JsonTokenType.Number when reader.TryGetInt32(out int value) => value,
-                JsonTokenType.Number when reader.TryGetInt64(out long value) => value,
+                JsonTokenType.Number when reader.TryGetInt32(out int result) => result,
+                JsonTokenType.Number when reader.TryGetInt64(out long result) => result,
                 JsonTokenType.Number => reader.GetDouble(),
-                JsonTokenType.String when reader.TryGetDateTimeOffset(out DateTimeOffset value) => value,
-                JsonTokenType.String when reader.TryGetGuid(out Guid value) => value,
+                JsonTokenType.String when reader.TryGetDateTimeOffset(out DateTimeOffset result) => result,
+                JsonTokenType.String when reader.TryGetGuid(out Guid result) => result,
                 JsonTokenType.String => reader.GetString(),
                 JsonTokenType.StartObject => ReadObject(ref reader, options),
                 JsonTokenType.StartArray => ReadArray(ref reader, options),
@@ -28,28 +27,28 @@ namespace Developist.Extensions.Api.ProblemDetails.Serialization
 
         private object ReadObject(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            var value = new ExpandoObject() as IDictionary<string, object?>;
+            var result = new ExpandoObject() as IDictionary<string, object?>;
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
                 var key = reader.GetString()!;
                 reader.Read();
-                value.Add(key, Read(ref reader, typeof(object), options));
+                result.Add(key, Read(ref reader, typeof(object), options));
             }
 
-            return value;
+            return result;
         }
 
         private object?[] ReadArray(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            ArrayList value = new();
+            List<object?> result = new();
 
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
-                value.Add(Read(ref reader, typeof(object), options));
+                result.Add(Read(ref reader, typeof(object), options));
             }
 
-            return value.ToArray();
+            return result.ToArray();
         }
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
