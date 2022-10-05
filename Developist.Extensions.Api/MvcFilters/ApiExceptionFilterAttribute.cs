@@ -1,60 +1,57 @@
 ﻿using Developist.Extensions.Api.Exceptions;
 using Developist.Extensions.Api.ProblemDetails;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Developist.Extensions.Api.MvcFilters
 {
-    public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
+    public class ApiExceptionFilterAttribute : ExceptionFilterAttribute, IFilterFactory
     {
-        private readonly ApiExceptionFilterOptions? options;
-        private readonly IHostEnvironment? environment;
+        private ApiExceptionFilterOptions? options;
+        private IHostEnvironment? environment;
 
         public ApiExceptionFilterAttribute() { }
-        public ApiExceptionFilterAttribute(IOptions<ApiExceptionFilterOptions>? options = null, IHostEnvironment? environment = null)
+
+        [ActivatorUtilitiesConstructor]
+        public ApiExceptionFilterAttribute(IOptions<ApiExceptionFilterOptions> options, IHostEnvironment environment)
         {
             this.options = options?.Value;
             this.environment = environment;
         }
 
+        public virtual bool IsReusable => true;
+
+        public virtual IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
+            => serviceProvider.GetService<ApiExceptionFilterAttribute>() ?? new();
+
         public override void OnException(ExceptionContext exceptionContext)
         {
-            if (exceptionContext.Exception is ApiException exception && ShouldHandleException(exception, exceptionContext.HttpContext))
+            if (exceptionContext.Exception is ApiException exception)
             {
-                var problemDetails = exception.ToProblemDetails(ShouldDiscloseExceptionDetails(exception, exceptionContext.HttpContext));
-                OnSerializingProblemDetails(problemDetails, exceptionContext.HttpContext);
+                EnsureDependenciesResolved(exceptionContext.HttpContext.RequestServices);
+                if (options.ShouldHandleException(exception, environment))
+                {
+                    var problemDetails = exception.ToProblemDetails(options.ShouldDiscloseExceptionDetails(exception, environment));
+                    options.OnSerializingProblemDetails(problemDetails, exceptionContext.HttpContext);
 
-                exceptionContext.Result = new ObjectResult(problemDetails);
-                exceptionContext.ExceptionHandled = true;
+                    exceptionContext.Result = new ObjectResult(problemDetails);
+                    exceptionContext.ExceptionHandled = true;
+                }
             }
             base.OnException(exceptionContext);
         }
 
-        private bool ShouldHandleException(ApiException exception, HttpContext httpContext)
+        [MemberNotNull(nameof(options), nameof(environment))]
+        private void EnsureDependenciesResolved(IServiceProvider serviceProvider)
         {
-            IHostEnvironment? environment = this.environment ?? httpContext.RequestServices.GetService<IHostEnvironment>();
-            ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
-
-            return options?.ShouldHandleException(exception, environment) is true;
-        }
-
-        private bool ShouldDiscloseExceptionDetails(ApiException exception, HttpContext httpContext)
-        {
-            IHostEnvironment? environment = this.environment ?? httpContext.RequestServices.GetService<IHostEnvironment>();
-            ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
-
-            return options?.ShouldDiscloseExceptionDetails(exception, environment) is true;
-        }
-
-        private void OnSerializingProblemDetails(ApiProblemDetails problemDetails, HttpContext httpContext)
-        {
-            ApiExceptionFilterOptions? options = this.options ?? httpContext.RequestServices.GetService<IOptions<ApiExceptionFilterOptions>>()?.Value;
-            options?.OnSerializingProblemDetails(problemDetails, httpContext);
+            options ??= serviceProvider.GetRequiredService<IOptions<ApiExceptionFilterOptions>>().Value;
+            environment ??= serviceProvider.GetRequiredService<IHostEnvironment>();
         }
     }
 }

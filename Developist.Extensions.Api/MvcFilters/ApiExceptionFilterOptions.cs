@@ -10,8 +10,8 @@ namespace Developist.Extensions.Api.MvcFilters
 {
     public class ApiExceptionFilterOptions
     {
-        public Func<ApiException, IHostEnvironment?, bool> ShouldHandleException { get; set; } = (_, _) => true;
-        public Func<ApiException, IHostEnvironment?, bool> ShouldDiscloseExceptionDetails { get; set; } = (_, env) => env?.IsDevelopment() is true;
+        public Func<ApiException, IHostEnvironment, bool> ShouldHandleException { get; set; } = (_, _) => true;
+        public Func<ApiException, IHostEnvironment, bool> ShouldDiscloseExceptionDetails { get; set; } = (_, env) => env.IsDevelopment();
         public Action<ApiProblemDetails, HttpContext> OnSerializingProblemDetails { get; set; } = (prob, ctx) =>
         {
             prob.Extensions["traceId"] = Activity.Current?.Id ?? ctx.TraceIdentifier;
