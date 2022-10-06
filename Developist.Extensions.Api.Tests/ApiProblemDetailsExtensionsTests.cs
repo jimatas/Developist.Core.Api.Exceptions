@@ -38,7 +38,7 @@ namespace Developist.Extensions.Api.Tests
 
             var problemDetails = exception.ToProblemDetails(discloseExceptionDetails: true);
 
-            Assert.AreEqual(exception.DetailMessage(), problemDetails.Detail);
+            Assert.AreEqual(exception.GetDetailMessage(), problemDetails.Detail);
         }
     }
 }

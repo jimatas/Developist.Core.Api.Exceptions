@@ -11,7 +11,7 @@ namespace Developist.Extensions.Api.ProblemDetails
                 Status = exception.StatusCode,
                 Title = exception.ReasonPhrase,
                 Type = exception.HelpLink,
-                Detail = discloseExceptionDetails ? exception.DetailMessage() : exception.Message
+                Detail = discloseExceptionDetails ? exception.GetDetailMessage() : exception.Message
             };
 
             return problemDetails;

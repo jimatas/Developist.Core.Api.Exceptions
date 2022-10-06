@@ -9,34 +9,34 @@ namespace Developist.Extensions.Api.Tests
     public class ApiExceptionExtensionsTests
     {
         [TestMethod]
-        public void DetailMessage_ByDefault_ReturnsMessage()
+        public void GetDetailMessage_ByDefault_ReturnsMessage()
         {
             var exception = new ApiException(HttpStatusCode.InternalServerError, "There was a problem servicing your request.");
 
-            var detailMessage = exception.DetailMessage();
+            var detailMessage = exception.GetDetailMessage();
 
             Assert.IsTrue(detailMessage.Contains("ApiException: There was a problem servicing your request."));
         }
 
         [TestMethod]
-        public void DetailMessage_GivenApiExceptionWithInnerException_ReturnsInnerExceptionDetailsInMessage()
+        public void GetDetailMessage_GivenApiExceptionWithInnerException_ReturnsInnerExceptionDetailsInMessage()
         {
             var exception = new ApiException(HttpStatusCode.InternalServerError, "There was a problem servicing your request.",
                 innerException: new ValidationException("A required property was empty."));
 
-            var detailMessage = exception.DetailMessage();
+            var detailMessage = exception.GetDetailMessage();
 
             Assert.IsTrue(detailMessage.Contains("ValidationException: A required property was empty."));
         }
 
         [TestMethod]
-        public void DetailMessage_GivenApiExceptionWithNestedInnerExceptions_ReturnsAllInnerExceptionDetailsInMessage()
+        public void GetDetailMessage_GivenApiExceptionWithNestedInnerExceptions_ReturnsAllInnerExceptionDetailsInMessage()
         {
             var exception = new ApiException(HttpStatusCode.InternalServerError, "There was a problem servicing your request.",
                 innerException: new InvalidOperationException("One or more properties did not validate.",
                     innerException: new ValidationException("A required property was empty.")));
 
-            var detailMessage = exception.DetailMessage();
+            var detailMessage = exception.GetDetailMessage();
 
             Assert.IsTrue(detailMessage.Contains("InvalidOperationException: One or more properties did not validate.") && detailMessage.Contains("ValidationException: A required property was empty."));
         }

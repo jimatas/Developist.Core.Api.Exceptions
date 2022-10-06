@@ -99,20 +99,20 @@ namespace Developist.Extensions.Api.Exceptions
             };
         }
 
-        public static string DetailMessage(this ApiException exception)
+        public static string GetDetailMessage(this ApiException exception)
         {
-            StringBuilder detailMessageBuilder = new(DetailMessageFor(exception));
+            StringBuilder detailMessageBuilder = new(GetDetailMessageFor(exception));
 
             Exception? innerException = exception.InnerException;
             for (int level = 1; innerException is not null; level++)
             {
-                detailMessageBuilder.Append($" [InnerException ({level}): {DetailMessageFor(innerException)}]");
+                detailMessageBuilder.Append($" [InnerException ({level}): {GetDetailMessageFor(innerException)}]");
                 innerException = innerException.InnerException;
             }
 
             return detailMessageBuilder.ToString();
 
-            static string DetailMessageFor(Exception exception)
+            static string GetDetailMessageFor(Exception exception)
             {
                 string detailMessage = $"{exception.GetType().FullName}: {exception.Message}";
                 if (!string.IsNullOrEmpty(exception.StackTrace))
