@@ -32,13 +32,17 @@ namespace Developist.Extensions.Api.MvcFilters
 
         public override void OnException(ExceptionContext exceptionContext)
         {
-            if (exceptionContext.Exception is ApiException exception)
+            if (exceptionContext.Exception is ApiException apiException)
             {
-                EnsureServicesInitialized(exceptionContext.HttpContext.RequestServices);
-                if (options.ShouldHandleException(exception, environment))
+                var httpContext = exceptionContext.HttpContext;
+                
+                EnsureServicesInitialized(httpContext.RequestServices);
+                if (options.ShouldHandleException(apiException, environment))
                 {
-                    var problemDetails = exception.ToProblemDetails(options.ShouldDiscloseExceptionDetails(exception, environment));
-                    options.OnSerializingProblemDetails(problemDetails, exceptionContext.HttpContext);
+                    var problemDetails = apiException.ToProblemDetails(
+                        options.ShouldDiscloseExceptionDetails(apiException, environment));
+                    
+                    options.OnSerializingProblemDetails(problemDetails, httpContext);
 
                     exceptionContext.Result = new ObjectResult(problemDetails);
                     exceptionContext.ExceptionHandled = true;
