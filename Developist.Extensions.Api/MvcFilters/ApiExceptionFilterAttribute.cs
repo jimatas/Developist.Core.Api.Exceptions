@@ -34,7 +34,7 @@ namespace Developist.Extensions.Api.MvcFilters
         {
             if (exceptionContext.Exception is ApiException exception)
             {
-                EnsureDependenciesResolved(exceptionContext.HttpContext.RequestServices);
+                EnsureServicesInitialized(exceptionContext.HttpContext.RequestServices);
                 if (options.ShouldHandleException(exception, environment))
                 {
                     var problemDetails = exception.ToProblemDetails(options.ShouldDiscloseExceptionDetails(exception, environment));
@@ -48,7 +48,7 @@ namespace Developist.Extensions.Api.MvcFilters
         }
 
         [MemberNotNull(nameof(options), nameof(environment))]
-        private void EnsureDependenciesResolved(IServiceProvider serviceProvider)
+        private void EnsureServicesInitialized(IServiceProvider serviceProvider)
         {
             options ??= serviceProvider.GetRequiredService<IOptions<ApiExceptionFilterOptions>>().Value;
             environment ??= serviceProvider.GetRequiredService<IHostEnvironment>();
