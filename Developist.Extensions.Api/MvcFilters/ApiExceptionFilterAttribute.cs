@@ -35,14 +35,14 @@ namespace Developist.Extensions.Api.MvcFilters
             if (exceptionContext.Exception is ApiException apiException)
             {
                 var httpContext = exceptionContext.HttpContext;
-                
+
                 EnsureServicesInitialized(httpContext.RequestServices);
-                if (options.ShouldHandleException(apiException, environment))
+                if (options.ShouldHandleException(new(apiException, environment, httpContext)))
                 {
                     var problemDetails = apiException.ToProblemDetails(
-                        options.ShouldDiscloseExceptionDetails(apiException, environment));
-                    
-                    options.OnSerializingProblemDetails(problemDetails, httpContext);
+                        options.ShouldDiscloseExceptionDetails(new(apiException, environment, httpContext)));
+
+                    options.OnSerializingProblemDetails(new(problemDetails, apiException, environment, httpContext));
 
                     exceptionContext.Result = new ObjectResult(problemDetails);
                     exceptionContext.ExceptionHandled = true;
