@@ -12,7 +12,7 @@ namespace Developist.Extensions.Api.MvcFilters
             ApiProblemDetails problemDetails,
             ApiException exception,
             IHostEnvironment environment,
-            HttpContext context) : base(exception, environment, context)
+            HttpContext httpContext) : base(exception, environment, httpContext)
         {
             ProblemDetails = problemDetails;
         }
