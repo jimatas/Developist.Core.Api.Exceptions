@@ -24,7 +24,9 @@ namespace Developist.Extensions.Api.MvcFilters
 
         public override void OnException(ExceptionContext exceptionContext)
         {
-            if (exceptionContext.Exception is ApiException apiException && !exceptionContext.ExceptionHandled)
+            if (exceptionContext.Exception is ApiException apiException &&
+                // Checking ExceptionHandled in case a derived class implementation already handled the exception before calling base.OnException.
+                !exceptionContext.ExceptionHandled)
             {
                 var httpContext = exceptionContext.HttpContext;
                 var getOptions = httpContext.RequestServices.GetRequiredService<IOptions<ApiExceptionFilterOptions>>;
