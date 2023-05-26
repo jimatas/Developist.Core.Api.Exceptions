@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Jim Atas</Authors>
+    <Description>Enables easy translation of exceptions that occur in web API projects into standardized problem detail responses.</Description>
+    <Copyright>Copyright (c) $([System.DateTime]::Now.Year) $(Authors)</Copyright>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>$(Version.Split('.')[0]).$(Version.Split('.')[1]).0.0</AssemblyVersion>
+    <FileVersion>$(Version.Split('.')[0]).$(Version.Split('.')[1]).$([System.Math]::Floor($([System.DateTime]::Now.Subtract($([System.DateTime]::Parse("01-01-2000"))).TotalDays))).$([System.Math]::Floor($([MSBuild]::Divide($([System.DateTime]::Now.Subtract($([System.DateTime]::Today)).TotalSeconds), 2.0))))</FileVersion>
+    <RootNamespace>Developist.Core.Api</RootNamespace>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>api;webapi;problemdetails;exceptions;exceptionfilter</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jimatas/Developist.Core.Api.Exceptions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jimatas/Developist.Core.Api.Exceptions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Developist.Core.Api.Exceptions.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
