@@ -8,9 +8,12 @@ public class ApiExceptionTests
 {
     [DataTestMethod]
     [DataRow(typeof(BadRequestException), HttpStatusCode.BadRequest)]
+    [DataRow(typeof(ConflictException), HttpStatusCode.Conflict)]
     [DataRow(typeof(ForbiddenException), HttpStatusCode.Forbidden)]
     [DataRow(typeof(NotFoundException), HttpStatusCode.NotFound)]
+    [DataRow(typeof(TooManyRequestsException), HttpStatusCode.TooManyRequests)]
     [DataRow(typeof(UnauthorizedException), HttpStatusCode.Unauthorized)]
+    [DataRow(typeof(UnprocessableEntityException), HttpStatusCode.UnprocessableEntity)]
     public void ApiException_DefaultConstructor_SetsAllProperties(Type apiExceptionType, HttpStatusCode expectedStatusCode)
     {
         // Arrange
@@ -26,9 +29,12 @@ public class ApiExceptionTests
 
     [DataTestMethod]
     [DataRow(typeof(BadRequestException), "Bad Request", HttpStatusCode.BadRequest)]
+    [DataRow(typeof(ConflictException), "Conflict", HttpStatusCode.Conflict)]
     [DataRow(typeof(ForbiddenException), "Forbidden", HttpStatusCode.Forbidden)]
     [DataRow(typeof(NotFoundException), "Not Found", HttpStatusCode.NotFound)]
+    [DataRow(typeof(TooManyRequestsException), "Too Many Requests", HttpStatusCode.TooManyRequests)]
     [DataRow(typeof(UnauthorizedException), "Unauthorized", HttpStatusCode.Unauthorized)]
+    [DataRow(typeof(UnprocessableEntityException), "Unprocessable Entity", HttpStatusCode.UnprocessableEntity)]
     public void ApiException_MessageConstructor_SetsAllProperties(Type apiExceptionType, string message, HttpStatusCode expectedStatusCode)
     {
         // Arrange
@@ -45,9 +51,12 @@ public class ApiExceptionTests
 
     [DataTestMethod]
     [DataRow(typeof(BadRequestException), "Bad Request", HttpStatusCode.BadRequest)]
+    [DataRow(typeof(ConflictException), "Conflict", HttpStatusCode.Conflict)]
     [DataRow(typeof(ForbiddenException), "Forbidden", HttpStatusCode.Forbidden)]
     [DataRow(typeof(NotFoundException), "Not Found", HttpStatusCode.NotFound)]
+    [DataRow(typeof(TooManyRequestsException), "Too Many Requests", HttpStatusCode.TooManyRequests)]
     [DataRow(typeof(UnauthorizedException), "Unauthorized", HttpStatusCode.Unauthorized)]
+    [DataRow(typeof(UnprocessableEntityException), "Unprocessable Entity", HttpStatusCode.UnprocessableEntity)]
     public void ApiException_MessageAndInnerExceptionConstructor_SetsAllProperties(Type apiExceptionType, string message, HttpStatusCode expectedStatusCode)
     {
         // Arrange

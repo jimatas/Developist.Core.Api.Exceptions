@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace Developist.Core.Api.MvcFilters;
@@ -37,6 +38,7 @@ public class GlobalExceptionFilterAttribute : ExceptionFilterAttribute, IFilterF
     }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "Just a simple, hard-coded property.")]
     public bool IsReusable => true;
 
     /// <inheritdoc/>

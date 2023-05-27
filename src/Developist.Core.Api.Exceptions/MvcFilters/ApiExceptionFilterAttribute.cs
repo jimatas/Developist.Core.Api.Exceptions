@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Developist.Core.Api.MvcFilters;
 
@@ -30,6 +31,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute, IFilterFact
     }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "Just a simple, hard-coded property.")]
     public bool IsReusable => true;
 
     /// <inheritdoc/>
