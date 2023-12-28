@@ -43,7 +43,7 @@ public static class ApiExceptionExtensions
         { HttpStatusCode.ServiceUnavailable, ("Service Unavailable", new Uri("https://www.rfc-editor.org/rfc/rfc9110#section-15.6.4")) },
         { HttpStatusCode.GatewayTimeout, ("Gateway Timeout", new Uri("https://www.rfc-editor.org/rfc/rfc9110#section-15.6.5")) },
         { HttpStatusCode.HttpVersionNotSupported, ("HTTP Version Not Supported", new Uri("https://www.rfc-editor.org/rfc/rfc9110#section-15.6.6")) },
-        { HttpStatusCode.VariantAlsoNegotiates, ("Variant Also Negotiates", new Uri("https://www.rfc-editor.org/rfc/rfc2295.html#section-8.1s")) },
+        { HttpStatusCode.VariantAlsoNegotiates, ("Variant Also Negotiates", new Uri("https://www.rfc-editor.org/rfc/rfc2295.html#section-8.1")) },
         { HttpStatusCode.InsufficientStorage, ("Insufficient Storage", new Uri("https://www.rfc-editor.org/rfc/rfc4918.html#section-11.5")) },
         { HttpStatusCode.LoopDetected, ("Loop Detected", new Uri("https://www.rfc-editor.org/rfc/rfc5842.html#section-7.2")) },
         { HttpStatusCode.NotExtended, ("Not Extended", new Uri("https://www.rfc-editor.org/rfc/rfc2774.html#section-7")) },
