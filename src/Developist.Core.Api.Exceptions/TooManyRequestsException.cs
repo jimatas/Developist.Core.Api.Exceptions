@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net;
-
-namespace Developist.Core.Api.Exceptions;
+﻿namespace Developist.Core.Api.Exceptions;
 
 /// <summary>
 /// Represents an HTTP 429 Too Many Requests error that occurs during the execution of an API request.
@@ -32,6 +29,8 @@ public class TooManyRequestsException : ApiException
     /// <summary>
     /// Gets or sets the duration after which the client can retry the request.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Just a simple, automatic property.")]
-    public TimeSpan? RetryAfter { get; set; }
+    /// <remarks>
+    /// This property will have a value if the server specified a 'retry after' period.
+    /// </remarks>
+    public TimeSpan? RetryAfter { get; init; }
 }

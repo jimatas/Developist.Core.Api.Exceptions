@@ -1,2 +1,4 @@
-﻿global using MvcProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
-global using JsonNet = Newtonsoft.Json;
+﻿global using System.Diagnostics.CodeAnalysis;
+global using System.Net;
+global using System.Runtime.CompilerServices;
+global using System.Text;

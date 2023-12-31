@@ -1,10 +1,7 @@
-﻿using Developist.Core.Api.Utilities;
-using System.Net;
-
-namespace Developist.Core.Api.Exceptions;
+﻿namespace Developist.Core.Api.Exceptions;
 
 /// <summary>
-/// Represents a custom exception that is used to signal errors in the processing of HTTP requests made to an API.
+/// Encapsulates errors that occur during API operations and provides information about the HTTP status code associated with the error, a reason phrase, and a help link.
 /// </summary>
 public class ApiException : Exception
 {
@@ -61,7 +58,7 @@ public class ApiException : Exception
     /// </summary>
     public new Uri HelpLink
     {
-        get => new(base.HelpLink ?? "about:blank");
+        get => new(base.HelpLink!);
         protected set => base.HelpLink = value.ToString();
     }
 }

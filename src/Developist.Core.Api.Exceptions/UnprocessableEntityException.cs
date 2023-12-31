@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace Developist.Core.Api.Exceptions;
+﻿namespace Developist.Core.Api.Exceptions;
 
 /// <summary>
 /// Represents an HTTP 422 Unprocessable Entity error that occurs during the execution of an API request.

@@ -1,7 +1,8 @@
-﻿using Developist.Core.Api.Utilities;
-using System.Net;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-namespace Developist.Core.Api.MvcFilters;
+namespace Developist.Core.Api.Exceptions.Filters;
 
 /// <summary>
 /// Represents the options that can be used to configure a <see cref="GlobalExceptionFilterAttribute"/>.
@@ -16,9 +17,20 @@ public class GlobalExceptionFilterOptions
     /// </summary>
     public GlobalExceptionFilterOptions()
     {
-        _exceptionTypesByInheritanceDepthInitializer = new Lazy<IEnumerable<Type>>(
-            () => _exceptionToStatusCodeMappings.Keys.OrderByDescending(type => type, new DepthOfInheritanceComparer()));
+        _exceptionTypesByInheritanceDepthInitializer = new Lazy<IEnumerable<Type>>(() =>
+            _exceptionToStatusCodeMappings.Keys.OrderByDescending(type => type, new DepthOfInheritanceComparer()));
     }
+
+    /// <summary>
+    /// Gets or sets a delegate that determines whether to disclose exception details in the problem details response.
+    /// </summary>
+    /// <remarks>
+    /// The default function discloses exception details in the development environment only.
+    /// </remarks>
+    public Func<Exception, HttpContext, bool> ShouldDiscloseExceptionDetails { get; set; } = (_, ctx) =>
+    {
+        return ctx.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment();
+    };
 
     /// <summary>
     /// Maps the specified exception type to the specified HTTP status code.
@@ -31,7 +43,14 @@ public class GlobalExceptionFilterOptions
         _exceptionToStatusCodeMappings[typeof(TException)] = statusCode.EnsureErrorStatusCode();
     }
 
-    internal HttpStatusCode GetMappedStatusCodeOrDefault(Exception exception,
+    /// <summary>
+    /// Gets the mapped HTTP status code for a given exception, or a default status code if no mapping is found.
+    /// </summary>
+    /// <param name="exception">The exception for which to retrieve the mapped status code.</param>
+    /// <param name="defaultStatusCode">The default HTTP status code to use if no mapping is found.</param>
+    /// <returns>The mapped HTTP status code associated with the provided exception type,
+    /// or the default status code if no specific mapping is defined.</returns>
+    public HttpStatusCode GetMappedStatusCodeOrDefault(Exception exception,
         HttpStatusCode defaultStatusCode = HttpStatusCode.InternalServerError)
     {
         foreach (var exceptionType in _exceptionTypesByInheritanceDepthInitializer.Value)
