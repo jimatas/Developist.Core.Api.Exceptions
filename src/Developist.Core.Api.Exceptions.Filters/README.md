@@ -1,10 +1,10 @@
 # Developist.Core.Api.Exceptions.Filters
 
 ## Overview
-This library enhances ASP.NET Core applications with error handling and standardized problem details responses.
+The `Developist.Core.Api.Exceptions.Filters` enhances ASP.NET Core applications with error handling and standardized problem details responses.
 
 ### Usage
-This library automatically handles unhandled exceptions in ASP.NET Core MVC controllers, generating standardized `ProblemDetails` responses based on mapped HTTP status codes.
+The library automatically handles unhandled exceptions in ASP.NET Core MVC controllers, generating standardized `ProblemDetails` responses based on mapped HTTP status codes.
 For instances of [`ApiException`](../Developist.Core.Api.Exceptions/ApiException.cs) or its derivatives, manual mapping is not required.
 
 ### Installation
