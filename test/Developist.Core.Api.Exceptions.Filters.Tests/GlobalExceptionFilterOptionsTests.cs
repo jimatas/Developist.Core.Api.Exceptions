@@ -1,28 +1,56 @@
-﻿using Developist.Core.Api.Exceptions;
-using Developist.Core.Api.MvcFilters;
-using System.Net;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
-namespace Developist.Core.Api.Tests;
+namespace Developist.Core.Api.Exceptions.Filters.Tests;
 
 [TestClass]
 public class GlobalExceptionFilterOptionsTests
 {
+    [DataTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void ShouldDiscloseExceptionDetails_ByDefault_ChecksHostingEnvironment(bool isDevelopment)
+    {
+        // Arrange
+        var hostEnvironmentMock = new Mock<IHostEnvironment>();
+        hostEnvironmentMock.SetupGet(host => host.EnvironmentName)
+            .Returns(isDevelopment ? Environments.Development : Environments.Production);
+
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(provider => provider.GetService(typeof(IHostEnvironment)))
+            .Returns(hostEnvironmentMock.Object);
+
+        var options = new GlobalExceptionFilterOptions();
+        var httpContext = new DefaultHttpContext
+        {
+            RequestServices = serviceProviderMock.Object
+        };
+
+        var exception = new Exception();
+
+        // Act
+        var result = options.ShouldDiscloseExceptionDetails(exception, httpContext);
+
+        // Assert
+        Assert.AreEqual(isDevelopment, result);
+    }
+
     [TestMethod]
-    public void MapExceptionToStatusCode_GivenBadRequestExceptionToUnprocessableEntityStatusCodeMapping_MapsIt()
+    public void MapExceptionToStatusCode_GivenValidationExceptionToBadRequestStatusCodeMapping_MapsException()
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
 
         // Act
-        options.MapExceptionToStatusCode<BadRequestException>(HttpStatusCode.UnprocessableEntity);
-        var statusCode = options.GetMappedStatusCodeOrDefault(new BadRequestException());
+        options.MapExceptionToStatusCode<ValidationException>(HttpStatusCode.BadRequest);
+        var statusCode = options.GetMappedStatusCodeOrDefault(new ValidationException("Bad Request"));
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.UnprocessableEntity, statusCode);
+        Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
     }
 
     [TestMethod]
-    public void MapExceptionToStatusCode_GivenArgumentExceptionToBadRequestStatusMapping_MapsIt()
+    public void MapExceptionToStatusCode_GivenArgumentExceptionToBadRequestStatusMapping_MapsException()
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
@@ -36,17 +64,17 @@ public class GlobalExceptionFilterOptionsTests
     }
 
     [TestMethod]
-    public void MapExceptionToStatusCode_GivenNonErrorStatusCode_ThrowsArgumentException()
+    public void MapExceptionToStatusCode_GivenNonErrorStatusCode_ThrowsArgumentOutOfRangeException()
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
 
         // Act
-        var action = () => options.MapExceptionToStatusCode<Exception>(HttpStatusCode.OK);
+        void action() => options.MapExceptionToStatusCode<Exception>(HttpStatusCode.OK);
 
         // Assert
         var exception = Assert.ThrowsException<ArgumentOutOfRangeException>(action);
-        Assert.AreEqual("statusCode", exception.ParamName);
+        StringAssert.Contains(exception.Message, "Value does not indicate an HTTP error status.");
     }
 
     [TestMethod]
@@ -67,10 +95,9 @@ public class GlobalExceptionFilterOptionsTests
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
-
-        // Act
         options.MapExceptionToStatusCode<ArgumentException>(HttpStatusCode.BadRequest);
 
+        // Act
         var statusCode = options.GetMappedStatusCodeOrDefault(new ArgumentNullException());
 
         // Assert
@@ -82,11 +109,10 @@ public class GlobalExceptionFilterOptionsTests
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
-
-        // Act
         options.MapExceptionToStatusCode<ArgumentException>(HttpStatusCode.BadRequest);
         options.MapExceptionToStatusCode<ArgumentNullException>(HttpStatusCode.UnprocessableEntity);
 
+        // Act
         var statusCode = options.GetMappedStatusCodeOrDefault(new ArgumentNullException());
 
         // Assert
@@ -98,11 +124,10 @@ public class GlobalExceptionFilterOptionsTests
     {
         // Arrange
         var options = new GlobalExceptionFilterOptions();
-
-        // Act
         options.MapExceptionToStatusCode<ArgumentException>(HttpStatusCode.BadRequest);
         options.MapExceptionToStatusCode<ArgumentNullException>(HttpStatusCode.UnprocessableEntity);
 
+        // Act
         var statusCode = options.GetMappedStatusCodeOrDefault(new ArgumentException());
 
         // Assert

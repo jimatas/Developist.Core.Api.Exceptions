@@ -1,8 +1,4 @@
-﻿using Developist.Core.Api.Exceptions;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
-
-namespace Developist.Core.Api.Tests;
+﻿namespace Developist.Core.Api.Exceptions.Tests;
 
 [TestClass]
 public class ApiExceptionExtensionsTests
@@ -66,24 +62,10 @@ public class ApiExceptionExtensionsTests
     }
 
     [TestMethod]
-    public void GetDefaultReasonPhrase_GivenBadRequestException_ReturnsExpectedReasonPhrase()
-    {
-        // Arrange
-        var exception = new BadRequestException();
-
-        // Act
-        var defaultReasonPhrase = exception.GetDefaultReasonPhrase();
-
-        // Assert
-        Assert.AreEqual("Bad Request", defaultReasonPhrase);
-        Assert.AreEqual(defaultReasonPhrase, exception.ReasonPhrase);
-    }
-
-    [TestMethod]
     public void GetDefaultReasonPhrase_GivenUnauthorizedException_ReturnsExpectedReasonPhrase()
     {
         // Arrange
-        var exception = new UnauthorizedException();
+        var exception = new UnauthorizedException("The request could not be authenticated.");
 
         // Act
         var defaultReasonPhrase = exception.GetDefaultReasonPhrase();
@@ -97,7 +79,7 @@ public class ApiExceptionExtensionsTests
     public void GetDefaultReasonPhrase_GivenForbiddenException_ReturnsExpectedReasonPhrase()
     {
         // Arrange
-        var exception = new ForbiddenException();
+        var exception = new ForbiddenException("You are not authorized to view this resource.");
 
         // Act
         var defaultReasonPhrase = exception.GetDefaultReasonPhrase();
@@ -111,7 +93,7 @@ public class ApiExceptionExtensionsTests
     public void GetDefaultReasonPhrase_GivenNotFoundException_ReturnsExpectedReasonPhrase()
     {
         // Arrange
-        var exception = new NotFoundException();
+        var exception = new NotFoundException("The requested resource was not found.");
 
         // Act
         var defaultReasonPhrase = exception.GetDefaultReasonPhrase();
@@ -134,7 +116,7 @@ public class ApiExceptionExtensionsTests
         Assert.IsTrue(string.IsNullOrEmpty(defaultReasonPhrase));
     }
 
-    [TestMethod]
+    [DataTestMethod]
     [DynamicData(nameof(ErrorStatusCodes))]
     public void GetDefaultReasonPhrase_ForAnyErrorStatusCode_ReturnsReasonPhrase(HttpStatusCode errorStatusCode)
     {
@@ -176,16 +158,21 @@ public class ApiExceptionExtensionsTests
         Assert.AreNotEqual(new Uri("about:blank"), defaultHelpLink);
     }
 
-    private static IEnumerable<object[]> ErrorStatusCodes => Enumerable
+    #region Test Helpers
+    public static IEnumerable<object[]> ErrorStatusCodes => Enumerable
         .Range(400, 200)
         .Where(statusCode => Enum.IsDefined(typeof(HttpStatusCode), statusCode))
         .Select(statusCode => new object[] { (HttpStatusCode)statusCode });
 
     private class CustomStackTraceApiException : ApiException
     {
-        public CustomStackTraceApiException(HttpStatusCode statusCode, string message, string stackTrace)
-            : base(statusCode, message) => StackTrace = stackTrace;
+        public CustomStackTraceApiException(
+            HttpStatusCode statusCode,
+            string message,
+            string stackTrace) : base(statusCode, message)
+            => StackTrace = stackTrace;
 
         public override string? StackTrace { get; }
     }
+    #endregion
 }

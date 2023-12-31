@@ -1,6 +1,4 @@
-﻿using Developist.Core.Api.Exceptions;
-using Developist.Core.Api.MvcFilters;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -8,52 +6,76 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
-using Moq;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
 
-namespace Developist.Core.Api.Tests;
+namespace Developist.Core.Api.Exceptions.Filters.Tests;
 
 [TestClass]
 public class GlobalExceptionFilterAttributeTests
 {
     [TestMethod]
-    public void OnException_GivenApiExceptionAndApiExceptionFilterRegistered_DoesNotHandleIt()
+    public void IsReusable_ByDefault_ReturnsTrue()
     {
-        // Arrange
+        var globalExceptionFilter = new GlobalExceptionFilterAttribute();
+
+        // Act
+        var result = globalExceptionFilter.IsReusable;
+
+        // Assert
+        Assert.IsTrue(result);
+    }
+
+    [TestMethod]
+    public void OnException_InitializedUsingDefaultConstructor_ResolvesRequiredServices()
+    {
         var problemDetailsFactoryMock = new Mock<ProblemDetailsFactory>();
+        problemDetailsFactoryMock.Setup(factory => factory.CreateProblemDetails(
+            It.IsAny<HttpContext>(),
+            It.IsAny<int?>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<string>())).Verifiable();
+
+        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions
+        {
+            ShouldDiscloseExceptionDetails = (_, _) => true
+        };
+
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(provider => provider.GetService(typeof(ProblemDetailsFactory)))
+            .Returns(problemDetailsFactoryMock.Object).Verifiable();
+
+        serviceProviderMock.Setup(provider => provider.GetService(typeof(IOptions<GlobalExceptionFilterOptions>)))
+            .Returns(Options.Create(globalExceptionFilterOptions)).Verifiable();
 
         var actionContext = new ActionContext(
-            new DefaultHttpContext(),
+            new DefaultHttpContext
+            {
+                RequestServices = serviceProviderMock.Object,
+            },
             new RouteData(),
             new ActionDescriptor());
 
-        var filters = new List<IFilterMetadata>
+        var exceptionContext = new ExceptionContext(actionContext, new List<IFilterMetadata>())
         {
-            new ApiExceptionFilterAttribute()
+            Exception = new ArgumentNullException()
         };
 
-        var exceptionContext = new ExceptionContext(actionContext, filters)
-        {
-            Exception = new ApiException((HttpStatusCode)599)
-        };
-
-        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions();
-
-        var globalExceptionFilter = new GlobalExceptionFilterAttribute(
-            Options.Create(globalExceptionFilterOptions),
-            problemDetailsFactoryMock.Object);
+        var globalExceptionFilter = new GlobalExceptionFilterAttribute();
 
         // Act
         globalExceptionFilter.OnException(exceptionContext);
 
         // Assert
-        Assert.IsFalse(exceptionContext.ExceptionHandled);
-        problemDetailsFactoryMock.VerifyNoOtherCalls();
+        Assert.IsTrue(exceptionContext.ExceptionHandled);
+        problemDetailsFactoryMock.Verify();
+        serviceProviderMock.Verify();
     }
 
-    [TestMethod]
-    public void OnException_GivenApiExceptionAndNoApiExceptionFilterRegistered_HandlesIt()
+    [DataTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void OnException_GivenApiException_HandlesException(bool discloseExceptionDetails)
     {
         // Arrange
         var problemDetailsFactoryMock = new Mock<ProblemDetailsFactory>();
@@ -63,7 +85,7 @@ public class GlobalExceptionFilterAttributeTests
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
-            It.IsAny<string>()));
+            It.IsAny<string>())).Verifiable();
 
         var actionContext = new ActionContext(
             new DefaultHttpContext(),
@@ -75,7 +97,10 @@ public class GlobalExceptionFilterAttributeTests
             Exception = new ApiException((HttpStatusCode)599)
         };
 
-        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions();
+        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions
+        {
+            ShouldDiscloseExceptionDetails = (_, _) => discloseExceptionDetails
+        };
 
         var globalExceptionFilter = new GlobalExceptionFilterAttribute(
             Options.Create(globalExceptionFilterOptions),
@@ -86,20 +111,17 @@ public class GlobalExceptionFilterAttributeTests
 
         // Assert
         Assert.IsTrue(exceptionContext.ExceptionHandled);
-        problemDetailsFactoryMock.Verify(factory => factory.CreateProblemDetails(
-            It.IsAny<HttpContext>(),
-            It.IsAny<int?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<string>()));
+        problemDetailsFactoryMock.Verify();
     }
 
     [DataTestMethod]
-    [DataRow(typeof(ApplicationException))]
-    [DataRow(typeof(ArgumentException))]
-    [DataRow(typeof(NotSupportedException))]
-    public void OnException_GivenNonApiException_HandlesIt(Type nonApiExceptionType)
+    [DataRow(typeof(ApplicationException), false)]
+    [DataRow(typeof(ApplicationException), true)]
+    [DataRow(typeof(ArgumentException), false)]
+    [DataRow(typeof(ArgumentException), true)]
+    [DataRow(typeof(NotSupportedException), false)]
+    [DataRow(typeof(NotSupportedException), true)]
+    public void OnException_GivenNonApiException_HandlesException(Type nonApiExceptionType, bool discloseExceptionDetails)
     {
         // Arrange
         var problemDetailsFactoryMock = new Mock<ProblemDetailsFactory>();
@@ -109,7 +131,7 @@ public class GlobalExceptionFilterAttributeTests
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
-            It.IsAny<string>()));
+            It.IsAny<string>())).Verifiable();
 
         var actionContext = new ActionContext(
             new DefaultHttpContext(),
@@ -121,7 +143,10 @@ public class GlobalExceptionFilterAttributeTests
             Exception = (Exception)Activator.CreateInstance(nonApiExceptionType)!
         };
 
-        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions();
+        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions
+        {
+            ShouldDiscloseExceptionDetails = (_, _) => discloseExceptionDetails
+        };
 
         var globalExceptionFilter = new GlobalExceptionFilterAttribute(
             Options.Create(globalExceptionFilterOptions),
@@ -132,17 +157,13 @@ public class GlobalExceptionFilterAttributeTests
 
         // Assert
         Assert.IsTrue(exceptionContext.ExceptionHandled);
-        problemDetailsFactoryMock.Verify(factory => factory.CreateProblemDetails(
-            It.IsAny<HttpContext>(),
-            It.IsAny<int?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<string>()));
+        problemDetailsFactoryMock.Verify();
     }
 
-    [TestMethod]
-    public void OnException_GivenValidationException_HandlesIt()
+    [DataTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void OnException_GivenValidationException_HandlesException(bool discloseExceptionDetails)
     {
         // Arrange
         var problemDetailsFactoryMock = new Mock<ProblemDetailsFactory>();
@@ -153,7 +174,7 @@ public class GlobalExceptionFilterAttributeTests
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
-            It.IsAny<string>()));
+            It.IsAny<string>())).Verifiable();
 
         var actionContext = new ActionContext(
             new DefaultHttpContext(),
@@ -162,10 +183,13 @@ public class GlobalExceptionFilterAttributeTests
 
         var exceptionContext = new ExceptionContext(actionContext, new List<IFilterMetadata>())
         {
-            Exception = new ValidationException()
+            Exception = new ValidationException("A required property was empty.")
         };
 
-        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions();
+        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions
+        {
+            ShouldDiscloseExceptionDetails = (_, _) => discloseExceptionDetails
+        };
 
         var globalExceptionFilter = new GlobalExceptionFilterAttribute(
             Options.Create(globalExceptionFilterOptions),
@@ -176,14 +200,50 @@ public class GlobalExceptionFilterAttributeTests
 
         // Assert
         Assert.IsTrue(exceptionContext.ExceptionHandled);
-        problemDetailsFactoryMock.Verify(factory => factory.CreateValidationProblemDetails(
+        problemDetailsFactoryMock.Verify();
+    }
+
+    [DataTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void OnException_GivenValidationExceptionWithValidationResult_HandlesException(bool discloseExceptionDetails)
+    {
+        // Arrange
+        var problemDetailsFactoryMock = new Mock<ProblemDetailsFactory>();
+        problemDetailsFactoryMock.Setup(factory => factory.CreateValidationProblemDetails(
             It.IsAny<HttpContext>(),
             It.IsAny<ModelStateDictionary>(),
             It.IsAny<int?>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
-            It.IsAny<string>()));
+            It.IsAny<string>())).Verifiable();
+
+        var actionContext = new ActionContext(
+            new DefaultHttpContext(),
+            new RouteData(),
+            new ActionDescriptor());
+
+        var exceptionContext = new ExceptionContext(actionContext, new List<IFilterMetadata>())
+        {
+            Exception = new ValidationException(new ValidationResult("A required property was empty."), validatingAttribute: null, value: null)
+        };
+
+        var globalExceptionFilterOptions = new GlobalExceptionFilterOptions
+        {
+            ShouldDiscloseExceptionDetails = (_, _) => discloseExceptionDetails
+        };
+
+        var globalExceptionFilter = new GlobalExceptionFilterAttribute(
+            Options.Create(globalExceptionFilterOptions),
+            problemDetailsFactoryMock.Object);
+
+        // Act
+        globalExceptionFilter.OnException(exceptionContext);
+
+        // Assert
+        Assert.IsTrue(exceptionContext.ExceptionHandled);
+        problemDetailsFactoryMock.Verify();
     }
 
     [TestMethod]
