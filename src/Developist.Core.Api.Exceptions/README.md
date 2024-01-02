@@ -1,7 +1,7 @@
 # Developist.Core.Api.Exceptions
 
 ## Overview
-The `Developist.Core.Api.Exceptions` library provides a set of core exception types for use in applications, designed to handle common error scenarios in web API projects.
+The `Developist.Core.Api.Exceptions` library provides a set of core exception types for use in .NET applications, designed to handle common error scenarios in ASP.NET Core MVC/API projects.
 
 ## Exceptions
 
